@@ -41,8 +41,8 @@ CREATE TABLE lessons (
    id SERIAL PRIMARY KEY, 
    fk_student INTEGER REFERENCES students(id), 
    fk_tutor INTEGER REFERENCES tutors(id), 
-   start_time  timestamp NOT NULL, 
-   end_time  timestamp NOT NULL, 
+   start_time  timestamp check(end_time > start_time) NOT NULL, 
+   end_time  timestamp check(end_time > start_time) NOT NULL, 
    homework TEXT
 );
 CREATE TABLE transactions (
