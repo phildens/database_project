@@ -7,7 +7,7 @@ CREATE TABLE parents (
 
 CREATE TABLE students(
     id BIGSERIAL NOT NULL PRIMARY KEY,
-    id_parent INTEGER REFERENCES parents(id_parent),
+    id_parent BIGINT REFERENCES parents(id_parent),
     name VARCHAR(50) NOT NULL, 
     surname VARCHAR(50) NOT NULL,
     email_adress VARCHAR(50) NOT NULL
@@ -15,13 +15,12 @@ CREATE TABLE students(
 
 
 CREATE TABLE refill_balances (
-    student_id INTEGER REFERENCES students(id),
+    student_id BIGINT REFERENCES students(id),
     balance integer DEFAULT 0,
     time_change  timestamp NOT NULL
 );
 CREATE TABLE subjects (
-    id SERIAL NOT NULL PRIMARY KEY,
-    subject_name VARCHAR(50) NOT NULL
+    subject_name VARCHAR(50) NOT NULL PRIMARY KEY
 );
 
 CREATE TABLE tutors (
@@ -34,19 +33,19 @@ CREATE TABLE tutors (
 CREATE TABLE cost (
     id BIGSERIAL NOT NULL PRIMARY KEY,
     id_tutor INTEGER REFERENCES tutors(id),
-    subject_id INTEGER REFERENCES subjects(id),
+    subject VARCHAR(50) REFERENCES subjects(subject_name),
     cost integer NOT NULL
 );
 CREATE TABLE lessons (
    id SERIAL PRIMARY KEY, 
-   fk_student INTEGER REFERENCES students(id), 
-   fk_tutor INTEGER REFERENCES tutors(id), 
+   fk_student BIGINT REFERENCES students(id), 
+   fk_tutor BIGINT REFERENCES tutors(id), 
    start_time  timestamp check(end_time > start_time) NOT NULL, 
    end_time  timestamp check(end_time > start_time) NOT NULL, 
+   subject VARCHAR(50) REFERENCES subjects(subject_name),
    homework TEXT
 );
 CREATE TABLE transactions (
-    id BIGSERIAL NOT NULL PRIMARY KEY,
     fk_lesson INTEGER REFERENCES lessons(id),
     paid_status BOOLEAN
 );
