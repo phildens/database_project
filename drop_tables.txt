@@ -1,0 +1,10 @@
+
+drop table if exists cost; 
+drop table if exists lessons cascade; 
+drop table if exists refill_balances;
+drop table if exists transactions;
+drop table if exists tutors;
+
+drop table if exists subjects;
+drop table if exists students;
+drop table if exists parents;

@@ -1,10 +1,10 @@
 
-INSERT INTO parents (name, surname, email_adress)
+INSERT INTO parents (id_parent, name, surname, email_adress)
 VALUES
     (3,'Jane', 'Smith', 'jane.smith@example.com'),
     (4,'Michael', 'Johnson', 'michael.johnson@example.com'),
     (1,'Denis', 'Filippov', 'denis.filippov@example.com'),
-    (5,'Emily', 'Brown', 'emily.brown@example.com')
+    (5,'Emily', 'Brown', 'emily.brown@example.com'),
     (2,'William', 'Anderson', 'william.anderson@example.com'),
     (6,'Ella', 'Garcia', 'ella.garcia@example.com'),
     (7,'James', 'Lee', 'james.lee@example.com'),

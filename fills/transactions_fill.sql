@@ -1,4 +1,4 @@
-INSERT INTO transactions (id, fk_lesson, paid_status)
+INSERT INTO transactions (fk_lesson, paid_status)
 VALUES
     (1, true),
     (2, false),
