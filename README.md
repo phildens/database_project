@@ -136,3 +136,140 @@
      - `fk_lesson`: Идентификатор урока, на который ссылается транзакция (внешний ключ).
      - `paid_status`: Статус оплаты (TRUE - оплачено, FALSE - не оплачено).
 
+
+# Дополнительные задачи 
+
+1. **Создание представлений**:
+Представление для таблицы "students" и "parents"  
+```CREATE VIEW student_parent_view AS
+SELECT s.id, s.name AS student_name, s.surname AS student_surname,
+       s.email_adress AS student_email, p.name AS parent_name, 
+       p.surname AS parent_surname, p.email_adress AS parent_email
+FROM students s
+JOIN parents p ON s.id_parent = p.id_parent;
+```
+2. **Создание индексов**:
+Индекс для таблицы "students" 
+```CREATE INDEX idx_students_id_parent ON students (id_parent);
+```
+
+3. **Создание хранимых процедур или функций**:
+Процедура для добавления урока
+```CREATE OR REPLACE PROCEDURE add_lesson(
+    in_student_id BIGINT,
+    in_tutor_id BIGINT,
+    in_start_time TIMESTAMP,
+    in_end_time TIMESTAMP,
+    in_subject VARCHAR(50),
+    in_homework TEXT)
+AS
+$$
+BEGIN
+    INSERT INTO lessons (fk_student, fk_tutor, start_time, end_time, subject, homework)
+    VALUES (in_student_id, in_tutor_id, in_start_time, in_end_time, in_subject, in_homework);
+END;
+$$
+LANGUAGE plpgsql;
+
+```
+Функция для расчета общего баланса студента
+```
+CREATE OR REPLACE FUNCTION calculate_total_balance(student_id BIGINT)
+RETURNS INTEGER AS
+$$
+DECLARE
+    total_balance INTEGER;
+BEGIN
+    SELECT SUM(balance) INTO total_balance
+    FROM refill_balances
+    WHERE student_id = $1;
+
+    RETURN total_balance;
+END;
+$$
+LANGUAGE plpgsql;
+```
+Процедура для обновления баланса студента после пополнения
+```
+CREATE OR REPLACE PROCEDURE update_balance(
+    in_student_id BIGINT,
+    in_amount INTEGER)
+AS
+$$
+BEGIN
+    UPDATE refill_balances
+    SET balance = balance + in_amount
+    WHERE student_id = in_student_id;
+END;
+$$
+LANGUAGE plpgsql;
+```
+4. **Создание триггеров**:
+
+Триггер для автоматического обновления баланса при пополнении
+
+```
+CREATE OR REPLACE FUNCTION update_student_balance()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    UPDATE refill_balances
+    SET balance = balance + NEW.amount
+    WHERE student_id = NEW.student_id;
+
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER update_student_balance_trigger
+AFTER INSERT ON refill_balances
+FOR EACH ROW
+EXECUTE FUNCTION update_student_balance();
+```
+Триггер для проверки времени начала и конца урока
+```
+CREATE OR REPLACE FUNCTION validate_lesson_time()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    IF NEW.end_time <= NEW.start_time THEN
+        RAISE EXCEPTION 'End time must be greater than start time';
+    END IF;
+
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER validate_lesson_time_trigger
+BEFORE INSERT ON lessons
+FOR EACH ROW
+EXECUTE FUNCTION validate_lesson_time();
+```
+Триггер для автоматического выставления статуса "оплачено" при проведении урока
+```
+CREATE OR REPLACE FUNCTION update_transaction_status()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    INSERT INTO transactions (fk_lesson, paid_status)
+    VALUES (NEW.id, TRUE);
+
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER update_transaction_status_trigger
+AFTER INSERT ON lessons
+FOR EACH ROW
+EXECUTE FUNCTION update_transaction_status();
+```
+
+5. **Создание тестов с использованием pytest**:
+Создание тестов с использованием pytest  
+тест для проверки добавления урока  
+тест для проверки общего баланса студента  
+тест для проверки времени начала и конца урока  
+тест для проверки автоматического обновления баланса при пополнении
